@@ -276,7 +276,6 @@ export class HomestaysService {
     const rows = await this.homestayModel
       .find({
         mountains: new Types.ObjectId(mountainId),
-        status: HomestayStatus.ACTIVE,
       })
       .populate('province', 'name')
       .populate('city', 'name')
@@ -293,7 +292,7 @@ export class HomestaysService {
 
   async findPublicBySlug(slug: string) {
     const homestay = await this.homestayModel
-      .findOne({ slug, status: HomestayStatus.ACTIVE })
+      .findOne({ slug })
       .populate('province', 'name')
       .populate('city', 'name')
       .populate('mountains', 'name slug')
@@ -327,7 +326,6 @@ export class HomestaysService {
 
     const rows = await this.homestayModel
       .find({
-        status: HomestayStatus.ACTIVE,
         name: { $regex: safe, $options: 'i' },
       })
       .populate('province', 'name')

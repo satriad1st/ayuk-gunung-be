@@ -124,7 +124,6 @@ export class BasecampsService {
     const rows = await this.basecampModel
       .find({
         mountain: new Types.ObjectId(mountainId),
-        status: BasecampStatus.ACTIVE,
       })
       .populate('mountain', 'name slug')
       .sort({ name: 1 })
@@ -135,7 +134,7 @@ export class BasecampsService {
 
   async findPublicBySlug(slug: string) {
     const basecamp = await this.basecampModel
-      .findOne({ slug, status: BasecampStatus.ACTIVE })
+      .findOne({ slug })
       .populate('mountain', 'name slug')
       .exec();
 
@@ -154,7 +153,6 @@ export class BasecampsService {
 
     const rows = await this.basecampModel
       .find({
-        status: BasecampStatus.ACTIVE,
         name: { $regex: safe, $options: 'i' },
       })
       .populate('mountain', 'name slug')

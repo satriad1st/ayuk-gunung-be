@@ -22,6 +22,7 @@ export enum HikingStatus {
 export const PUBLIC_MOUNTAIN_STATUSES = [
   MountainStatus.ACTIVE,
   MountainStatus.ALERT,
+  MountainStatus.INACTIVE,
 ] as const;
 
 @Schema({ timestamps: true, collection: 'mountains' })

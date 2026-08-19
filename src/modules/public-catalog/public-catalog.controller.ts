@@ -30,14 +30,14 @@ export class PublicCatalogController {
   ) {}
 
   @Get('provinces')
-  @ApiOperation({ summary: 'Provinces that currently have active mountains' })
+  @ApiOperation({ summary: 'Provinces that currently have mountains' })
   provinces() {
     return this.mountainsService.findPublicProvinces();
   }
 
   @Get('search')
   @ApiOperation({
-    summary: 'Search active mountains, basecamps, and homestays',
+    summary: 'Search mountains, basecamps, and homestays',
   })
   search(@Query() query: QueryPublicSearchDto) {
     const keyword = query.q?.trim() ?? '';
@@ -53,7 +53,7 @@ export class PublicCatalogController {
   }
 
   @Get('mountains')
-  @ApiOperation({ summary: 'List active mountains' })
+  @ApiOperation({ summary: 'List mountains' })
   @ApiOkResponse()
   mountains(@Query() query: QueryPublicMountainDto) {
     return this.mountainsService.findPublic(query);
