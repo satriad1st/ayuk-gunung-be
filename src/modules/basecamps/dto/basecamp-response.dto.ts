@@ -4,6 +4,7 @@ import {
   BasecampStatus,
   OpenDaysType,
   OvernightStay,
+  SimaksiType,
   TrashCheck,
 } from '../schemas/basecamp.schema';
 
@@ -80,6 +81,12 @@ export class BasecampResponseDto {
 
   @ApiPropertyOptional()
   simaksiPrice?: number;
+
+  @ApiProperty({ enum: SimaksiType })
+  simaksiType: SimaksiType;
+
+  @ApiPropertyOptional()
+  simaksiRegistrationUrl?: string;
 
   @ApiProperty({ enum: TrashCheck })
   trashCheck: TrashCheck;

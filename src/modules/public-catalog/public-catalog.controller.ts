@@ -11,6 +11,7 @@ import { distanceKm } from '../../common/utils/geo';
 import { BasecampsService } from '../basecamps/basecamps.service';
 import { HomestaysService } from '../homestays/homestays.service';
 import { MountainsService } from '../mountains/mountains.service';
+import { PrivateTripService } from '../private-trip/private-trip.service';
 import {
   QueryPublicMountainDto,
   QueryPublicSearchDto,
@@ -27,6 +28,7 @@ export class PublicCatalogController {
     private readonly mountainsService: MountainsService,
     private readonly basecampsService: BasecampsService,
     private readonly homestaysService: HomestaysService,
+    private readonly privateTripService: PrivateTripService,
   ) {}
 
   @Get('provinces')
@@ -88,6 +90,12 @@ export class PublicCatalogController {
       .sort((a, b) => a.distanceKm - b.distanceKm);
 
     return { basecamp, homestays: nearby };
+  }
+
+  @Get('private-trip')
+  @ApiOperation({ summary: 'Private trip landing content' })
+  privateTrip() {
+    return this.privateTripService.get();
   }
 
   @Get('homestays/:slug')

@@ -19,6 +19,7 @@ import {
   BasecampOpenStatus,
   BasecampStatus,
   OpenDaysType,
+  SimaksiType,
 } from './schemas/basecamp.schema';
 import { escapeRegex } from '../../common/utils/escape-regex';
 
@@ -53,6 +54,7 @@ export class BasecampsService {
       gpxFileName: dto.gpxFileName,
       overnightStay: dto.overnightStay,
       simaksiPrice: dto.simaksiPrice,
+      ...this.simaksiFields(dto),
       trashCheck: dto.trashCheck,
       status: dto.status,
       ...this.operationalFields(dto),
@@ -280,6 +282,26 @@ export class BasecampsService {
       basecamp.simaksiPrice = dto.simaksiPrice;
     }
 
+    if (
+      dto.simaksiType !== undefined ||
+      dto.simaksiRegistrationUrl !== undefined
+    ) {
+      const nextType = dto.simaksiType ?? basecamp.simaksiType ?? SimaksiType.ON_SITE;
+      const nextUrl =
+        dto.simaksiRegistrationUrl !== undefined
+          ? dto.simaksiRegistrationUrl
+          : basecamp.simaksiRegistrationUrl;
+      const fields = this.simaksiFields({
+        simaksiType: nextType,
+        simaksiRegistrationUrl: nextUrl,
+      });
+      basecamp.simaksiType = fields.simaksiType;
+      basecamp.simaksiRegistrationUrl = fields.simaksiRegistrationUrl;
+      if (!fields.simaksiRegistrationUrl) {
+        basecamp.set('simaksiRegistrationUrl', undefined);
+      }
+    }
+
     if (dto.images) {
       const removed = basecamp.images.filter(
         (image) => !dto.images?.includes(image),
@@ -380,6 +402,8 @@ export class BasecampsService {
       gpxFileName: basecamp.gpxFileName,
       overnightStay: basecamp.overnightStay,
       simaksiPrice: basecamp.simaksiPrice,
+      simaksiType: basecamp.simaksiType ?? SimaksiType.ON_SITE,
+      simaksiRegistrationUrl: basecamp.simaksiRegistrationUrl,
       trashCheck: basecamp.trashCheck,
       status: basecamp.status,
       openStatus: basecamp.openStatus ?? BasecampOpenStatus.OPEN,
@@ -396,6 +420,29 @@ export class BasecampsService {
       routeSegments: this.normalizeRouteSegments(basecamp.routeSegments),
       createdAt: basecamp.createdAt,
       updatedAt: basecamp.updatedAt,
+    };
+  }
+
+  private simaksiFields(dto: {
+    simaksiType?: SimaksiType;
+    simaksiRegistrationUrl?: string | null;
+  }) {
+    const simaksiType = dto.simaksiType ?? SimaksiType.ON_SITE;
+    const url =
+      typeof dto.simaksiRegistrationUrl === 'string'
+        ? dto.simaksiRegistrationUrl.trim()
+        : undefined;
+
+    if (simaksiType === SimaksiType.ONLINE && !url) {
+      throw new BadRequestException(
+        'Link registrasi simaksi wajib diisi jika jenis simaksi online',
+      );
+    }
+
+    return {
+      simaksiType,
+      simaksiRegistrationUrl:
+        simaksiType === SimaksiType.ONLINE ? url : undefined,
     };
   }
 

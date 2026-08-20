@@ -35,6 +35,12 @@ export const ADMIN_MENUS: AdminMenu[] = [
     permission: Permission.HOMESTAY_READ,
   },
   {
+    key: 'private-trip',
+    label: 'Private Trip',
+    path: '/private-trip',
+    permission: Permission.PRIVATE_TRIP_READ,
+  },
+  {
     key: 'admins',
     label: 'Manajemen Admin',
     path: '/admins',

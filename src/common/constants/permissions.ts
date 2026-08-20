@@ -21,6 +21,9 @@ export enum Permission {
   HOMESTAY_CREATE = 'homestay:create',
   HOMESTAY_UPDATE = 'homestay:update',
   HOMESTAY_DELETE = 'homestay:delete',
+
+  PRIVATE_TRIP_READ = 'private_trip:read',
+  PRIVATE_TRIP_UPDATE = 'private_trip:update',
 }
 
 export const ALL_PERMISSIONS = Object.values(Permission);

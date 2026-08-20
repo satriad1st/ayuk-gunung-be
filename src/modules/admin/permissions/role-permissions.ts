@@ -20,6 +20,8 @@ export const ROLE_PERMISSIONS: Record<AdminRole, Permission[]> = {
     Permission.HOMESTAY_CREATE,
     Permission.HOMESTAY_UPDATE,
     Permission.HOMESTAY_DELETE,
+    Permission.PRIVATE_TRIP_READ,
+    Permission.PRIVATE_TRIP_UPDATE,
   ],
   [AdminRole.ADMIN_HOMESTAY]: [
     Permission.DASHBOARD_READ,

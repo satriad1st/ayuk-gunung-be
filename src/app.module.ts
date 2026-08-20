@@ -9,6 +9,7 @@ import { BasecampsModule } from './modules/basecamps/basecamps.module';
 import { HealthModule } from './modules/health/health.module';
 import { HomestaysModule } from './modules/homestays/homestays.module';
 import { MountainsModule } from './modules/mountains/mountains.module';
+import { PrivateTripModule } from './modules/private-trip/private-trip.module';
 import { PublicCatalogModule } from './modules/public-catalog/public-catalog.module';
 import { RegionsModule } from './modules/regions/regions.module';
 import { StorageModule } from './modules/storage/storage.module';
@@ -38,6 +39,7 @@ import { UsersModule } from './modules/users/users.module';
     MountainsModule,
     BasecampsModule,
     HomestaysModule,
+    PrivateTripModule,
     PublicCatalogModule,
   ],
 })

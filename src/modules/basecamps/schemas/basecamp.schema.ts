@@ -15,6 +15,11 @@ export enum TrashCheck {
   AVAILABLE = 'available',
 }
 
+export enum SimaksiType {
+  ONLINE = 'online',
+  ON_SITE = 'on_site',
+}
+
 export enum BasecampStatus {
   ACTIVE = 'active',
   INACTIVE = 'inactive',
@@ -105,6 +110,16 @@ export class Basecamp {
 
   @Prop({ min: 0 })
   simaksiPrice?: number;
+
+  @Prop({
+    type: String,
+    enum: SimaksiType,
+    default: SimaksiType.ON_SITE,
+  })
+  simaksiType: SimaksiType;
+
+  @Prop({ trim: true })
+  simaksiRegistrationUrl?: string;
 
   @Prop({ type: String, enum: TrashCheck, required: true })
   trashCheck: TrashCheck;

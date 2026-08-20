@@ -12,8 +12,10 @@ import {
   IsLongitude,
   IsMongoId,
   IsNumber,
+  IsNotEmpty,
   IsOptional,
   IsString,
+  IsUrl,
   Matches,
   MaxLength,
   Min,
@@ -26,6 +28,7 @@ import {
   BasecampStatus,
   OpenDaysType,
   OvernightStay,
+  SimaksiType,
   TrashCheck,
   WEEKDAYS,
 } from '../schemas/basecamp.schema';
@@ -40,6 +43,18 @@ function nullableNumber({ value, obj, key }: TransformFnParams) {
   }
 
   return Number(value);
+}
+
+function nullableUrl({ value, obj, key }: TransformFnParams) {
+  if (!Object.prototype.hasOwnProperty.call(obj, key)) {
+    return undefined;
+  }
+
+  if (value === '' || value === null) {
+    return null;
+  }
+
+  return typeof value === 'string' ? value.trim() : value;
 }
 
 export class RouteSegmentDto {
@@ -152,6 +167,30 @@ export class CreateBasecampDto {
   @IsNumber()
   @Min(0)
   simaksiPrice?: number;
+
+  @ApiPropertyOptional({
+    enum: SimaksiType,
+    default: SimaksiType.ON_SITE,
+    description: 'Jenis simaksi: online atau di lokasi',
+  })
+  @IsOptional()
+  @IsEnum(SimaksiType)
+  simaksiType?: SimaksiType;
+
+  @ApiPropertyOptional({
+    example: 'https://simaksi.example.com/daftar',
+    description: 'Link registrasi simaksi, wajib jika jenisnya online',
+  })
+  @ValidateIf(
+    (dto: CreateBasecampDto) => dto.simaksiType === SimaksiType.ONLINE,
+  )
+  @Transform(nullableUrl)
+  @IsNotEmpty({
+    message: 'simaksiRegistrationUrl is required when simaksi is online',
+  })
+  @IsUrl({ require_protocol: true, protocols: ['http', 'https'] })
+  @MaxLength(500)
+  simaksiRegistrationUrl?: string | null;
 
   @ApiProperty({ enum: TrashCheck, example: TrashCheck.AVAILABLE })
   @IsEnum(TrashCheck)
