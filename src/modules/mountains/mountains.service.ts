@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { slugify } from '../../common/utils/slugify';
+import { objectIdFilter, toObjectId } from '../../common/utils/object-id';
 import { RegionsService } from '../regions/regions.service';
 import { LocalStorageService } from '../storage/local-storage.service';
 import { CreateMountainDto } from './dto/create-mountain.dto';
@@ -41,8 +42,8 @@ export class MountainsService {
       slug: await this.uniqueSlug(dto.name),
       description: dto.description ?? '',
       elevation: dto.elevation,
-      province: dto.provinceId,
-      city: dto.cityId,
+      province: toObjectId(dto.provinceId),
+      city: toObjectId(dto.cityId),
       latitude: dto.latitude,
       longitude: dto.longitude,
       images: dto.images ?? [],
@@ -60,11 +61,11 @@ export class MountainsService {
     const filter: Record<string, unknown> = {};
 
     if (query.provinceId) {
-      filter.province = new Types.ObjectId(query.provinceId);
+      filter.province = objectIdFilter(query.provinceId);
     }
 
     if (query.cityId) {
-      filter.city = new Types.ObjectId(query.cityId);
+      filter.city = objectIdFilter(query.cityId);
     }
 
     if (query.type) {
@@ -247,11 +248,11 @@ export class MountainsService {
     }
 
     if (dto.provinceId) {
-      mountain.province = new Types.ObjectId(dto.provinceId);
+      mountain.province = toObjectId(dto.provinceId);
     }
 
     if (dto.cityId) {
-      mountain.city = new Types.ObjectId(dto.cityId);
+      mountain.city = toObjectId(dto.cityId);
     }
 
     if (dto.latitude !== undefined) {
