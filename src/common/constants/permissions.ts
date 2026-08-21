@@ -24,6 +24,10 @@ export enum Permission {
 
   PRIVATE_TRIP_READ = 'private_trip:read',
   PRIVATE_TRIP_UPDATE = 'private_trip:update',
+
+  PRIVATE_TRIP_BOOKING_CREATE = 'private_trip_booking:create',
+  PRIVATE_TRIP_BOOKING_UPDATE = 'private_trip_booking:update',
+  PRIVATE_TRIP_BOOKING_DELETE = 'private_trip_booking:delete',
 }
 
 export const ALL_PERMISSIONS = Object.values(Permission);

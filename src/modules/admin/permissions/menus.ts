@@ -7,6 +7,7 @@ export interface AdminMenu {
   label: string;
   path: string;
   permission: Permission;
+  children?: AdminMenu[];
 }
 
 export const ADMIN_MENUS: AdminMenu[] = [
@@ -39,6 +40,20 @@ export const ADMIN_MENUS: AdminMenu[] = [
     label: 'Private Trip',
     path: '/private-trip',
     permission: Permission.PRIVATE_TRIP_READ,
+    children: [
+      {
+        key: 'private-trip-schedule',
+        label: 'Jadwal Trip',
+        path: '/private-trip/jadwal',
+        permission: Permission.PRIVATE_TRIP_READ,
+      },
+      {
+        key: 'private-trip-settings',
+        label: 'Setting',
+        path: '/private-trip/settings',
+        permission: Permission.PRIVATE_TRIP_READ,
+      },
+    ],
   },
   {
     key: 'admins',
@@ -55,5 +70,12 @@ export const ADMIN_MENUS: AdminMenu[] = [
 ];
 
 export function getMenusForRole(role: AdminRole): AdminMenu[] {
-  return ADMIN_MENUS.filter((menu) => hasPermission(role, menu.permission));
+  return ADMIN_MENUS.filter((menu) =>
+    hasPermission(role, menu.permission),
+  ).map((menu) => ({
+    ...menu,
+    children: menu.children?.filter((child) =>
+      hasPermission(role, child.permission),
+    ),
+  }));
 }
