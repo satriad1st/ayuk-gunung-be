@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { PublicRegionsController } from './public-regions.controller';
 import { RegionsController } from './regions.controller';
 import { RegionsSeedService } from './regions.seed';
 import { RegionsService } from './regions.service';
@@ -13,7 +14,7 @@ import { Province, ProvinceSchema } from './schemas/province.schema';
       { name: City.name, schema: CitySchema },
     ]),
   ],
-  controllers: [RegionsController],
+  controllers: [RegionsController, PublicRegionsController],
   providers: [RegionsService, RegionsSeedService],
   exports: [RegionsService],
 })

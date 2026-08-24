@@ -148,6 +148,27 @@ export class BasecampsService {
     return this.toPublicResponse(basecamp);
   }
 
+  async findPublicByIds(ids: string[]) {
+    const objectIds = [
+      ...new Set(ids.filter((id) => Types.ObjectId.isValid(id))),
+    ].map((id) => new Types.ObjectId(id));
+    if (objectIds.length === 0) {
+      return [];
+    }
+
+    const rows = await this.basecampModel
+      .find({ _id: { $in: objectIds } })
+      .populate('mountain', 'name slug')
+      .exec();
+
+    const byId = new Map(
+      rows.map((row) => [row._id.toString(), this.toPublicResponse(row)]),
+    );
+    return objectIds
+      .map((id) => byId.get(id.toString()))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  }
+
   async searchPublic(keyword: string, limit = 6) {
     const safe = escapeRegex(keyword);
     if (!safe) {

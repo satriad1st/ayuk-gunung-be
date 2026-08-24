@@ -7,6 +7,17 @@ export default () => ({
     expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
   },
   corsOrigin: process.env.CORS_ORIGIN,
+  google: {
+    clientId: process.env.GOOGLE_CLIENT_ID,
+  },
+  mail: {
+    host: process.env.MAIL_HOST,
+    port: parseInt(process.env.MAIL_PORT ?? '587', 10),
+    user: process.env.MAIL_USER,
+    password: process.env.MAIL_PASSWORD,
+    from: process.env.MAIL_FROM,
+    secure: process.env.MAIL_SECURE === 'true',
+  },
   superadmin: {
     name: process.env.SUPERADMIN_NAME ?? 'Super Admin',
     email: process.env.SUPERADMIN_EMAIL,

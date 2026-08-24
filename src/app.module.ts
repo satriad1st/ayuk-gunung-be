@@ -6,6 +6,7 @@ import { validateEnv } from './config/env.validation';
 import { AdminModule } from './modules/admin/admin.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { BasecampsModule } from './modules/basecamps/basecamps.module';
+import { FavoritesModule } from './modules/favorites/favorites.module';
 import { HealthModule } from './modules/health/health.module';
 import { HomestaysModule } from './modules/homestays/homestays.module';
 import { MountainsModule } from './modules/mountains/mountains.module';
@@ -33,6 +34,7 @@ import { UsersModule } from './modules/users/users.module';
     HealthModule,
     UsersModule,
     AuthModule,
+    FavoritesModule,
     AdminModule,
     RegionsModule,
     StorageModule,

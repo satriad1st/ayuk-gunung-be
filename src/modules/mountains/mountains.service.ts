@@ -142,6 +142,34 @@ export class MountainsService {
     return this.toPublicResponse(this.toResponse(mountain));
   }
 
+  async findPublicByIds(ids: string[]) {
+    const objectIds = [
+      ...new Set(ids.filter((id) => Types.ObjectId.isValid(id))),
+    ].map((id) => new Types.ObjectId(id));
+    if (objectIds.length === 0) {
+      return [];
+    }
+
+    const rows = await this.mountainModel
+      .find({
+        _id: { $in: objectIds },
+        status: { $in: [...PUBLIC_MOUNTAIN_STATUSES] },
+      })
+      .populate('province', 'name')
+      .populate('city', 'name')
+      .exec();
+
+    const byId = new Map(
+      rows.map((row) => [
+        row._id.toString(),
+        this.toPublicResponse(this.toResponse(row)),
+      ]),
+    );
+    return objectIds
+      .map((id) => byId.get(id.toString()))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  }
+
   async findPublicProvinces() {
     const rows = await this.mountainModel
       .find({ status: { $in: [...PUBLIC_MOUNTAIN_STATUSES] } })

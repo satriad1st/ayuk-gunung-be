@@ -121,3 +121,4 @@ export const PrivateTripBookingSchema =
 PrivateTripBookingSchema.index({ startDate: 1, endDate: 1 });
 PrivateTripBookingSchema.index({ customerName: 1 });
 PrivateTripBookingSchema.index({ customerPhone: 1 });
+PrivateTripBookingSchema.index({ customerEmail: 1, startDate: -1 });

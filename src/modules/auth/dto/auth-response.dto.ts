@@ -1,8 +1,16 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { UserRole } from '../../../common/constants/roles';
 
+export class NamedRefDto {
+  @ApiProperty()
+  id: string;
+
+  @ApiProperty()
+  name: string;
+}
+
 export class UserResponseDto {
-  @ApiProperty({ example: '66b0c2f1a1b2c3d4e5f60789' })
+  @ApiProperty()
   id: string;
 
   @ApiProperty({ example: 'budi@example.com' })
@@ -11,12 +19,63 @@ export class UserResponseDto {
   @ApiProperty({ example: 'Budi Santoso' })
   name: string;
 
-  @ApiProperty({ enum: UserRole, example: UserRole.USER })
+  @ApiProperty({ enum: UserRole })
   role: UserRole;
+
+  @ApiPropertyOptional()
+  phone?: string;
+
+  @ApiPropertyOptional()
+  birthDate?: string;
+
+  @ApiPropertyOptional()
+  bloodType?: string;
+
+  @ApiPropertyOptional({ type: NamedRefDto })
+  province?: NamedRefDto;
+
+  @ApiPropertyOptional({ type: NamedRefDto })
+  city?: NamedRefDto;
+
+  @ApiPropertyOptional()
+  address?: string;
+
+  @ApiPropertyOptional()
+  latitude?: number;
+
+  @ApiPropertyOptional()
+  longitude?: number;
+
+  @ApiPropertyOptional()
+  avatarUrl?: string;
+
+  @ApiProperty()
+  emailVerified: boolean;
+
+  @ApiProperty()
+  googleLinked: boolean;
+
+  @ApiProperty()
+  hasPassword: boolean;
+
+  @ApiProperty()
+  isActive: boolean;
+
+  @ApiPropertyOptional()
+  bannedReason?: string;
+
+  @ApiPropertyOptional()
+  bannedAt?: Date;
+
+  @ApiProperty()
+  createdAt: Date;
+
+  @ApiProperty()
+  updatedAt: Date;
 }
 
 export class AuthResponseDto {
-  @ApiProperty({ example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' })
+  @ApiProperty()
   accessToken: string;
 
   @ApiProperty({ example: 'Bearer' })
@@ -27,4 +86,29 @@ export class AuthResponseDto {
 
   @ApiProperty({ type: UserResponseDto })
   user: UserResponseDto;
+}
+
+export class RegisterPendingDto {
+  @ApiProperty()
+  message: string;
+
+  @ApiProperty()
+  email: string;
+
+  @ApiPropertyOptional()
+  debugCode?: string;
+}
+
+export class UserListResponseDto {
+  @ApiProperty({ type: [UserResponseDto] })
+  data: UserResponseDto[];
+
+  @ApiProperty()
+  page: number;
+
+  @ApiProperty()
+  limit: number;
+
+  @ApiProperty()
+  total: number;
 }

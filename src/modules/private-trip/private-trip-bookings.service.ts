@@ -11,6 +11,7 @@ import { MountainsService } from '../mountains/mountains.service';
 import { addDaysYmd, moneyTotals } from './booking-money';
 import { AddBookingPaymentDto } from './dto/add-payment.dto';
 import { PrivateTripBookingResponseDto } from './dto/booking-response.dto';
+import { UserPrivateTripBookingDto } from './dto/user-booking-response.dto';
 import { CreatePrivateTripBookingDto } from './dto/create-booking.dto';
 import { QueryPrivateTripBookingDto } from './dto/query-booking.dto';
 import { UpdatePrivateTripBookingDto } from './dto/update-booking.dto';
@@ -77,6 +78,23 @@ export class PrivateTripBookingsService {
 
   async findById(id: string) {
     return this.toResponse(await this.findDocument(id));
+  }
+
+  async findForUser(email: string) {
+    const customerEmail = email.trim().toLowerCase();
+    if (!customerEmail) {
+      return { data: [], total: 0 };
+    }
+
+    const rows = await this.bookingModel
+      .find({ customerEmail })
+      .sort({ startDate: -1, createdAt: -1 })
+      .exec();
+
+    return {
+      data: rows.map((row) => this.toUserResponse(row)),
+      total: rows.length,
+    };
   }
 
   async create(dto: CreatePrivateTripBookingDto) {
@@ -339,6 +357,48 @@ export class PrivateTripBookingsService {
       paymentStatus: booking.paymentStatus,
       createdAt: booking.createdAt,
       updatedAt: booking.updatedAt,
+    };
+  }
+
+  private toUserResponse(
+    booking: PrivateTripBookingDocument,
+  ): UserPrivateTripBookingDto {
+    const mountainId =
+      booking.mountain instanceof Types.ObjectId
+        ? booking.mountain.toString()
+        : String(booking.mountain);
+
+    const payments = [...(booking.payments as unknown as PaymentSubdoc[])].sort(
+      (left, right) =>
+        new Date(left.paidAt).getTime() - new Date(right.paidAt).getTime(),
+    );
+
+    return {
+      id: booking._id.toString(),
+      customerName: booking.customerName,
+      pax: booking.pax,
+      mountain: {
+        id: mountainId,
+        name: booking.mountainName,
+      },
+      tripType: booking.tripType,
+      days: booking.days,
+      nights: booking.nights,
+      startDate: booking.startDate,
+      endDate: booking.endDate,
+      pricePerPerson: booking.pricePerPerson,
+      subtotal: booking.subtotal,
+      discount: booking.discount,
+      finalPrice: booking.finalPrice,
+      payments: payments.map((payment) => ({
+        id: payment._id.toString(),
+        amount: payment.amount,
+        paidAt: payment.paidAt,
+        method: payment.method,
+      })),
+      paidAmount: booking.paidAmount,
+      remainingAmount: booking.remainingAmount,
+      paymentStatus: booking.paymentStatus,
     };
   }
 }

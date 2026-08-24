@@ -318,6 +318,34 @@ export class HomestaysService {
     };
   }
 
+  async findPublicByIds(ids: string[]) {
+    const objectIds = [
+      ...new Set(ids.filter((id) => Types.ObjectId.isValid(id))),
+    ].map((id) => new Types.ObjectId(id));
+    if (objectIds.length === 0) {
+      return [];
+    }
+
+    const rows = await this.homestayModel
+      .find({ _id: { $in: objectIds } })
+      .populate('province', 'name')
+      .populate('city', 'name')
+      .populate('mountains', 'name slug')
+      .populate('facilities', 'name')
+      .exec();
+
+    const counts = await this.roomCounts(rows.map((row) => row._id));
+    const byId = new Map(
+      rows.map((row) => [
+        row._id.toString(),
+        this.toPublicResponse(row, counts.get(row._id.toString()) ?? 0),
+      ]),
+    );
+    return objectIds
+      .map((id) => byId.get(id.toString()))
+      .filter((item): item is NonNullable<typeof item> => Boolean(item));
+  }
+
   async searchPublic(keyword: string, limit = 6) {
     const safe = escapeRegex(keyword);
     if (!safe) {

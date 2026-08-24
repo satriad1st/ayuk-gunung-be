@@ -56,6 +56,12 @@ export const ADMIN_MENUS: AdminMenu[] = [
     ],
   },
   {
+    key: 'users',
+    label: 'Pengguna',
+    path: '/users',
+    permission: Permission.USER_READ,
+  },
+  {
     key: 'admins',
     label: 'Manajemen Admin',
     path: '/admins',
