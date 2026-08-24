@@ -226,6 +226,7 @@ export class CreateBasecampDto {
   openDays?: string[];
 
   @ApiPropertyOptional({ example: '07:00' })
+  @ValidateIf((dto: CreateBasecampDto) => dto.open24Hours !== true)
   @IsOptional()
   @IsString()
   @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, {
@@ -234,12 +235,37 @@ export class CreateBasecampDto {
   openTimeFrom?: string | null;
 
   @ApiPropertyOptional({ example: '16:00' })
+  @ValidateIf((dto: CreateBasecampDto) => dto.open24Hours !== true)
   @IsOptional()
   @IsString()
   @Matches(/^([01]\d|2[0-3]):[0-5]\d$/, {
     message: 'openTimeTo must be HH:mm',
   })
   openTimeTo?: string | null;
+
+  @ApiPropertyOptional({ default: false, description: 'Basecamp buka 24 jam' })
+  @IsOptional()
+  @IsBoolean()
+  open24Hours?: boolean;
+
+  @ApiPropertyOptional({ default: false, description: 'Ada ojek di basecamp' })
+  @IsOptional()
+  @IsBoolean()
+  ojekAvailable?: boolean;
+
+  @ApiPropertyOptional({ example: 20000 })
+  @IsOptional()
+  @Transform(nullableNumber)
+  @IsNumber()
+  @Min(0)
+  ojekPriceMin?: number | null;
+
+  @ApiPropertyOptional({ example: 50000 })
+  @IsOptional()
+  @Transform(nullableNumber)
+  @IsNumber()
+  @Min(0)
+  ojekPriceMax?: number | null;
 
   @ApiPropertyOptional({ default: false })
   @IsOptional()

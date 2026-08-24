@@ -155,6 +155,18 @@ export class Basecamp {
   openTimeTo?: string;
 
   @Prop({ default: false })
+  open24Hours: boolean;
+
+  @Prop({ default: false })
+  ojekAvailable: boolean;
+
+  @Prop({ min: 0 })
+  ojekPriceMin?: number;
+
+  @Prop({ min: 0 })
+  ojekPriceMax?: number;
+
+  @Prop({ default: false })
   tektokAllowed: boolean;
 
   @Prop({ trim: true })

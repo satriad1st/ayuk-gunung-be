@@ -39,6 +39,7 @@ export class BasecampsService {
 
     this.assertDurationRange(dto.durationHoursMin, dto.durationHoursMax);
     this.assertRouteSegments(dto.routeSegments);
+    this.assertOjekPriceRange(dto.ojekPriceMin, dto.ojekPriceMax, dto.ojekAvailable);
 
     const basecamp = await this.basecampModel.create({
       name: dto.name,
@@ -218,6 +219,13 @@ export class BasecampsService {
       dto.durationHoursMax ?? basecamp.durationHoursMax,
     );
 
+    const nextOjekAvailable = dto.ojekAvailable ?? basecamp.ojekAvailable ?? false;
+    this.assertOjekPriceRange(
+      dto.ojekPriceMin !== undefined ? dto.ojekPriceMin : basecamp.ojekPriceMin,
+      dto.ojekPriceMax !== undefined ? dto.ojekPriceMax : basecamp.ojekPriceMax,
+      nextOjekAvailable,
+    );
+
     if (dto.openStatus) {
       basecamp.openStatus = dto.openStatus;
     }
@@ -236,12 +244,38 @@ export class BasecampsService {
           : [];
     }
 
-    if (dto.openTimeFrom !== undefined) {
+    const nextOpen24Hours = dto.open24Hours ?? basecamp.open24Hours ?? false;
+
+    if (dto.openTimeFrom !== undefined && !nextOpen24Hours) {
       basecamp.openTimeFrom = dto.openTimeFrom || undefined;
     }
 
-    if (dto.openTimeTo !== undefined) {
+    if (dto.openTimeTo !== undefined && !nextOpen24Hours) {
       basecamp.openTimeTo = dto.openTimeTo || undefined;
+    }
+
+    if (dto.open24Hours !== undefined) {
+      basecamp.open24Hours = dto.open24Hours;
+      if (dto.open24Hours) {
+        basecamp.openTimeFrom = undefined;
+        basecamp.openTimeTo = undefined;
+      }
+    }
+
+    if (dto.ojekAvailable !== undefined) {
+      basecamp.ojekAvailable = dto.ojekAvailable;
+      if (!dto.ojekAvailable) {
+        basecamp.ojekPriceMin = undefined;
+        basecamp.ojekPriceMax = undefined;
+      }
+    }
+
+    if (dto.ojekPriceMin !== undefined && nextOjekAvailable) {
+      basecamp.ojekPriceMin = dto.ojekPriceMin ?? undefined;
+    }
+
+    if (dto.ojekPriceMax !== undefined && nextOjekAvailable) {
+      basecamp.ojekPriceMax = dto.ojekPriceMax ?? undefined;
     }
 
     if (dto.tektokAllowed !== undefined) {
@@ -411,6 +445,10 @@ export class BasecampsService {
       openDays: basecamp.openDays ?? [],
       openTimeFrom: basecamp.openTimeFrom,
       openTimeTo: basecamp.openTimeTo,
+      open24Hours: basecamp.open24Hours ?? false,
+      ojekAvailable: basecamp.ojekAvailable ?? false,
+      ojekPriceMin: basecamp.ojekPriceMin,
+      ojekPriceMax: basecamp.ojekPriceMax,
       tektokAllowed: basecamp.tektokAllowed ?? false,
       tektokDeadline: basecamp.tektokDeadline,
       elevationGain: basecamp.elevationGain,
@@ -448,13 +486,19 @@ export class BasecampsService {
 
   private operationalFields(dto: CreateBasecampDto | UpdateBasecampDto) {
     const openDaysType = dto.openDaysType ?? OpenDaysType.EVERYDAY;
+    const open24Hours = dto.open24Hours ?? false;
+    const ojekAvailable = dto.ojekAvailable ?? false;
     return {
       openStatus: dto.openStatus ?? BasecampOpenStatus.OPEN,
       openDaysType,
       openDays:
         openDaysType === OpenDaysType.CUSTOM ? (dto.openDays ?? []) : [],
-      openTimeFrom: dto.openTimeFrom || undefined,
-      openTimeTo: dto.openTimeTo || undefined,
+      open24Hours,
+      openTimeFrom: open24Hours ? undefined : dto.openTimeFrom || undefined,
+      openTimeTo: open24Hours ? undefined : dto.openTimeTo || undefined,
+      ojekAvailable,
+      ojekPriceMin: ojekAvailable ? (dto.ojekPriceMin ?? undefined) : undefined,
+      ojekPriceMax: ojekAvailable ? (dto.ojekPriceMax ?? undefined) : undefined,
       tektokAllowed: dto.tektokAllowed ?? false,
       tektokDeadline: dto.tektokAllowed
         ? dto.tektokDeadline || undefined
@@ -465,6 +509,22 @@ export class BasecampsService {
       durationHoursMax: dto.durationHoursMax ?? undefined,
       routeSegments: this.normalizeRouteSegments(dto.routeSegments),
     };
+  }
+
+  private assertOjekPriceRange(
+    min?: number | null,
+    max?: number | null,
+    available?: boolean,
+  ) {
+    if (!available) {
+      return;
+    }
+
+    if (min != null && max != null && max < min) {
+      throw new BadRequestException(
+        'ojekPriceMax must be greater than or equal to ojekPriceMin',
+      );
+    }
   }
 
   private assertDurationRange(min?: number | null, max?: number | null) {

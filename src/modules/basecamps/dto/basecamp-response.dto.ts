@@ -110,6 +110,18 @@ export class BasecampResponseDto {
   openTimeTo?: string;
 
   @ApiProperty()
+  open24Hours: boolean;
+
+  @ApiProperty()
+  ojekAvailable: boolean;
+
+  @ApiPropertyOptional()
+  ojekPriceMin?: number;
+
+  @ApiPropertyOptional()
+  ojekPriceMax?: number;
+
+  @ApiProperty()
   tektokAllowed: boolean;
 
   @ApiPropertyOptional()
