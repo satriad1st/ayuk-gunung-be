@@ -11,6 +11,8 @@ import { distanceKm } from '../../common/utils/geo';
 import { BasecampsService } from '../basecamps/basecamps.service';
 import { HomestaysService } from '../homestays/homestays.service';
 import { MountainsService } from '../mountains/mountains.service';
+import { OpenTripService } from '../open-trip/open-trip.service';
+import { QueryOpenTripDto } from '../open-trip/dto/query-open-trip.dto';
 import { PrivateTripService } from '../private-trip/private-trip.service';
 import {
   QueryPublicMountainDto,
@@ -29,6 +31,7 @@ export class PublicCatalogController {
     private readonly basecampsService: BasecampsService,
     private readonly homestaysService: HomestaysService,
     private readonly privateTripService: PrivateTripService,
+    private readonly openTripService: OpenTripService,
   ) {}
 
   @Get('provinces')
@@ -66,10 +69,11 @@ export class PublicCatalogController {
   async mountain(@Param('slug') slug: string) {
     this.assertSlug(slug);
     const mountain = await this.mountainsService.findPublicBySlug(slug);
-    const basecamps = await this.basecampsService.findPublicByMountain(
-      mountain.id,
-    );
-    return { mountain, basecamps };
+    const [basecamps, openTrips] = await Promise.all([
+      this.basecampsService.findPublicByMountain(mountain.id),
+      this.openTripService.findPublicUpcomingByMountain(mountain.id),
+    ]);
+    return { mountain, basecamps, openTrips };
   }
 
   @Get('basecamps/:slug')
@@ -96,6 +100,27 @@ export class PublicCatalogController {
   @ApiOperation({ summary: 'Private trip landing content' })
   privateTrip() {
     return this.privateTripService.get();
+  }
+
+  @Get('open-trips')
+  @ApiOperation({ summary: 'List published open trips' })
+  openTrips(@Query() query: QueryOpenTripDto) {
+    return this.openTripService.findPublic(query);
+  }
+
+  @Get('open-trips/lookups/mountains')
+  @ApiOperation({
+    summary: 'Mountains that currently have published open trips',
+  })
+  openTripMountains() {
+    return this.openTripService.findPublicMountains();
+  }
+
+  @Get('open-trips/:slug')
+  @ApiOperation({ summary: 'Published open trip detail' })
+  openTrip(@Param('slug') slug: string) {
+    this.assertSlug(slug);
+    return this.openTripService.findPublicBySlug(slug);
   }
 
   @Get('homestays/:slug')

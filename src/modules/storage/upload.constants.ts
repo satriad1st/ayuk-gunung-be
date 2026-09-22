@@ -8,6 +8,7 @@ const ALLOWED_IMAGE_FOLDERS = new Set([
   'basecamps',
   'homestays',
   'rooms',
+  'open-trips',
 ]);
 
 export function resolveImageFolder(folder?: string) {

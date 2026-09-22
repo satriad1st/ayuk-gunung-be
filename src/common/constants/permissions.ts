@@ -31,6 +31,14 @@ export enum Permission {
 
   USER_READ = 'user:read',
   USER_BAN = 'user:ban',
+
+  OPEN_TRIP_READ = 'open_trip:read',
+  OPEN_TRIP_CREATE = 'open_trip:create',
+  OPEN_TRIP_UPDATE = 'open_trip:update',
+  OPEN_TRIP_DELETE = 'open_trip:delete',
+  OPEN_TRIP_BOOKING_CREATE = 'open_trip_booking:create',
+  OPEN_TRIP_BOOKING_UPDATE = 'open_trip_booking:update',
+  OPEN_TRIP_BOOKING_DELETE = 'open_trip_booking:delete',
 }
 
 export const ALL_PERMISSIONS = Object.values(Permission);

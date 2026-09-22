@@ -36,6 +36,26 @@ export const ADMIN_MENUS: AdminMenu[] = [
     permission: Permission.HOMESTAY_READ,
   },
   {
+    key: 'open-trip',
+    label: 'Open Trip',
+    path: '/open-trip',
+    permission: Permission.OPEN_TRIP_READ,
+    children: [
+      {
+        key: 'open-trip-list',
+        label: 'Daftar Trip',
+        path: '/open-trip',
+        permission: Permission.OPEN_TRIP_READ,
+      },
+      {
+        key: 'open-trip-bookings',
+        label: 'Pendaftaran',
+        path: '/open-trip/pendaftaran',
+        permission: Permission.OPEN_TRIP_READ,
+      },
+    ],
+  },
+  {
     key: 'private-trip',
     label: 'Private Trip',
     path: '/private-trip',
