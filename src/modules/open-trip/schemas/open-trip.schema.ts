@@ -9,6 +9,12 @@ export enum OpenTripStatus {
   CLOSED = 'closed',
 }
 
+export enum OpenTripType {
+  TEKTOK = 'tektok',
+  CAMP = 'camp',
+  CUSTOM = 'custom',
+}
+
 @Schema({ _id: true })
 export class OpenTripMeetingPoint {
   @Prop({ required: true, trim: true })
@@ -58,6 +64,14 @@ export class OpenTrip {
 
   @Prop({ type: [String], default: [] })
   images: string[];
+
+  @Prop({
+    type: String,
+    enum: OpenTripType,
+    default: OpenTripType.CAMP,
+    index: true,
+  })
+  tripType: OpenTripType;
 
   @Prop({ required: true })
   startDate: string;

@@ -14,7 +14,7 @@ import {
   MinLength,
   ValidateNested,
 } from 'class-validator';
-import { OpenTripStatus } from '../schemas/open-trip.schema';
+import { OpenTripStatus, OpenTripType } from '../schemas/open-trip.schema';
 
 const DATE_YMD = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -88,6 +88,11 @@ export class CreateOpenTripDto {
   @IsArray()
   @IsString({ each: true })
   images?: string[];
+
+  @ApiPropertyOptional({ enum: OpenTripType, example: OpenTripType.CAMP })
+  @IsOptional()
+  @IsEnum(OpenTripType)
+  tripType?: OpenTripType;
 
   @ApiProperty({ example: '2026-10-10' })
   @Matches(DATE_YMD)

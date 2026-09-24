@@ -224,11 +224,9 @@ export class OpenTripBookingsService {
     );
 
     const mepo = this.requireMeetingPoint(trip, dto.meetingPointId);
-    const addons = normalizeAddons(dto.addons);
     const money = moneyTotals({
       pax: dto.pax,
       pricePerPerson: mepo.pricePerPerson,
-      addonTotal: sumAddonTotal(addons),
       paidAmount: 0,
     });
 
@@ -254,7 +252,7 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       })),
-      addons,
+      addons: [],
       paymentChannel: OpenTripPaymentChannel.ADMIN,
       bookingStatus: OpenTripBookingStatus.INQUIRY,
       ...money,

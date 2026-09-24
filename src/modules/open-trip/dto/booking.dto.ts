@@ -182,14 +182,6 @@ export class RegisterOpenTripDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(40)
   participants: OpenTripParticipantDto[];
-
-  @ApiPropertyOptional({ type: [OpenTripAddonDto] })
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OpenTripAddonDto)
-  @ArrayMaxSize(20)
-  addons?: OpenTripAddonDto[];
 }
 
 export class AddOpenTripPaymentDto {

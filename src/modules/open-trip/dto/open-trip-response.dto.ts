@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { OpenTripStatus } from '../schemas/open-trip.schema';
+import { OpenTripStatus, OpenTripType } from '../schemas/open-trip.schema';
 
 export class OpenTripMountainDto {
   @ApiProperty()
@@ -56,6 +56,9 @@ export class OpenTripResponseDto {
 
   @ApiProperty({ type: [String] })
   images: string[];
+
+  @ApiProperty({ enum: OpenTripType })
+  tripType: OpenTripType;
 
   @ApiProperty()
   startDate: string;

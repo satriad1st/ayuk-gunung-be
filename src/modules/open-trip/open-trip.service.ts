@@ -23,6 +23,7 @@ import {
   OpenTrip,
   OpenTripDocument,
   OpenTripStatus,
+  OpenTripType,
 } from './schemas/open-trip.schema';
 
 @Injectable()
@@ -49,6 +50,7 @@ export class OpenTripService {
       itinerary: dto.itinerary?.trim() || undefined,
       includes: this.cleanList(dto.includes),
       images: dto.images ?? [],
+      tripType: dto.tripType ?? OpenTripType.CAMP,
       startDate: dto.startDate,
       endDate: dto.endDate,
       meetingPoints: meeting.points,
@@ -83,6 +85,21 @@ export class OpenTripService {
     }
     if (query.mountainId) {
       filter.mountain = toObjectId(query.mountainId);
+    }
+    if (query.tripType) {
+      if (query.tripType === OpenTripType.CAMP) {
+        filter.$and = [
+          ...(Array.isArray(filter.$and) ? filter.$and : []),
+          {
+            $or: [
+              { tripType: OpenTripType.CAMP },
+              { tripType: { $exists: false } },
+            ],
+          },
+        ];
+      } else {
+        filter.tripType = query.tripType;
+      }
     }
     const from =
       query.from && query.to && query.from > query.to ? query.to : query.from;
@@ -255,6 +272,9 @@ export class OpenTripService {
     }
     if (dto.images !== undefined) {
       trip.images = dto.images;
+    }
+    if (dto.tripType !== undefined) {
+      trip.tripType = dto.tripType;
     }
     trip.startDate = startDate;
     trip.endDate = endDate;
@@ -475,6 +495,7 @@ export class OpenTripService {
       itinerary: trip.itinerary,
       includes: trip.includes ?? [],
       images: trip.images ?? [],
+      tripType: trip.tripType ?? OpenTripType.CAMP,
       startDate: trip.startDate,
       endDate: trip.endDate,
       meetingPoints: normalizeMeetingPoints(trip),
