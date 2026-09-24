@@ -26,6 +26,21 @@ import {
 
 const DATE_YMD = /^\d{4}-\d{2}-\d{2}$/;
 
+export class OpenTripAddonDto {
+  @ApiProperty({ example: 'Sewa sleeping bag' })
+  @IsString()
+  @MinLength(1)
+  @MaxLength(80)
+  name: string;
+
+  @ApiProperty({ example: 50000 })
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @Max(50_000_000)
+  price: number;
+}
+
 export class OpenTripParticipantDto {
   @ApiProperty()
   @IsString()
@@ -94,6 +109,14 @@ export class CreateOpenTripBookingDto {
   @ArrayMaxSize(40)
   participants: OpenTripParticipantDto[];
 
+  @ApiPropertyOptional({ type: [OpenTripAddonDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OpenTripAddonDto)
+  @ArrayMaxSize(20)
+  addons?: OpenTripAddonDto[];
+
   @ApiPropertyOptional({ enum: OpenTripPaymentChannel })
   @IsOptional()
   @IsEnum(OpenTripPaymentChannel)
@@ -159,6 +182,14 @@ export class RegisterOpenTripDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(40)
   participants: OpenTripParticipantDto[];
+
+  @ApiPropertyOptional({ type: [OpenTripAddonDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OpenTripAddonDto)
+  @ArrayMaxSize(20)
+  addons?: OpenTripAddonDto[];
 }
 
 export class AddOpenTripPaymentDto {
@@ -279,6 +310,14 @@ export class UpdateOpenTripBookingDto {
   @ArrayMinSize(1)
   @ArrayMaxSize(40)
   participants?: OpenTripParticipantDto[];
+
+  @ApiPropertyOptional({ type: [OpenTripAddonDto] })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OpenTripAddonDto)
+  @ArrayMaxSize(20)
+  addons?: OpenTripAddonDto[];
 
   @ApiPropertyOptional({ enum: OpenTripBookingStatus })
   @IsOptional()

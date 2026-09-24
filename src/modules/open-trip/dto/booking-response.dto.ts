@@ -6,6 +6,14 @@ import {
   ParticipantGender,
 } from '../schemas/open-trip-booking.schema';
 
+export class OpenTripAddonResponseDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  price: number;
+}
+
 export class OpenTripParticipantResponseDto {
   @ApiProperty()
   name: string;
@@ -82,11 +90,23 @@ export class OpenTripBookingResponseDto {
   @ApiProperty()
   meetingPoint: string;
 
+  @ApiPropertyOptional()
+  meetingGatherDate?: string;
+
+  @ApiPropertyOptional()
+  meetingGatherTime?: string;
+
   @ApiProperty()
   pax: number;
 
   @ApiProperty({ type: [OpenTripParticipantResponseDto] })
   participants: OpenTripParticipantResponseDto[];
+
+  @ApiProperty({ type: [OpenTripAddonResponseDto] })
+  addons: OpenTripAddonResponseDto[];
+
+  @ApiProperty()
+  addonTotal: number;
 
   @ApiProperty({ enum: OpenTripPaymentChannel })
   paymentChannel: OpenTripPaymentChannel;
@@ -164,6 +184,12 @@ export class UserOpenTripBookingDto {
   @ApiProperty()
   meetingPoint: string;
 
+  @ApiPropertyOptional()
+  meetingGatherDate?: string;
+
+  @ApiPropertyOptional()
+  meetingGatherTime?: string;
+
   @ApiProperty()
   pricePerPerson: number;
 
@@ -172,6 +198,12 @@ export class UserOpenTripBookingDto {
 
   @ApiProperty({ type: [OpenTripParticipantResponseDto] })
   participants: OpenTripParticipantResponseDto[];
+
+  @ApiProperty({ type: [OpenTripAddonResponseDto] })
+  addons: OpenTripAddonResponseDto[];
+
+  @ApiProperty()
+  addonTotal: number;
 
   @ApiProperty({ enum: OpenTripBookingStatus })
   bookingStatus: OpenTripBookingStatus;

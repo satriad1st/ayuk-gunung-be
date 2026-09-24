@@ -13,11 +13,35 @@ export function formatIdDate(ymd: string) {
   });
 }
 
+export function formatGatherTime(hm?: string) {
+  if (!hm?.trim()) {
+    return '';
+  }
+  const [hour, minute] = hm.split(':');
+  if (!hour || !minute) {
+    return hm;
+  }
+  return `${hour}.${minute}`;
+}
+
+export function formatMeetingSchedule(input: {
+  gatherDate?: string;
+  gatherTime?: string;
+}) {
+  const date = input.gatherDate ? formatIdDate(input.gatherDate) : '';
+  const time = input.gatherTime
+    ? `pukul ${formatGatherTime(input.gatherTime)}`
+    : '';
+  return [date, time].filter(Boolean).join(', ');
+}
+
 export type MeetingPointView = {
   id: string;
   name: string;
   pricePerPerson: number;
   suggestedDp: number;
+  gatherDate?: string;
+  gatherTime?: string;
 };
 
 type MeetingPointSource = {
@@ -27,6 +51,8 @@ type MeetingPointSource = {
     name: string;
     pricePerPerson: number;
     suggestedDp?: number;
+    gatherDate?: string;
+    gatherTime?: string;
   }>;
   meetingPoint?: string;
   pricePerPerson?: number;
@@ -43,6 +69,8 @@ export function normalizeMeetingPoints(
       name: row.name,
       pricePerPerson: row.pricePerPerson,
       suggestedDp: row.suggestedDp ?? 0,
+      gatherDate: row.gatherDate || undefined,
+      gatherTime: row.gatherTime || undefined,
     }));
   }
 
@@ -83,15 +111,39 @@ export function findMeetingPoint(
   return undefined;
 }
 
+export type BookingAddonInput = {
+  name: string;
+  price: number;
+};
+
+export function normalizeAddons(items?: BookingAddonInput[]) {
+  if (!items?.length) {
+    return [];
+  }
+  return items
+    .map((item) => ({
+      name: item.name.trim(),
+      price: Math.max(0, Math.round(Number(item.price) || 0)),
+    }))
+    .filter((item) => item.name.length > 0);
+}
+
+export function sumAddonTotal(addons: Array<{ price: number }>) {
+  return addons.reduce((sum, item) => sum + Math.round(item.price || 0), 0);
+}
+
 export function moneyTotals(input: {
   pax: number;
   pricePerPerson: number;
+  addonTotal?: number;
   paidAmount?: number;
 }) {
-  const finalPrice = Math.round(input.pax * input.pricePerPerson);
+  const tripTotal = Math.round(input.pax * input.pricePerPerson);
+  const addonTotal = Math.round(input.addonTotal ?? 0);
+  const finalPrice = tripTotal + addonTotal;
   const paidAmount = Math.round(input.paidAmount ?? 0);
   const remainingAmount = Math.max(0, finalPrice - paidAmount);
-  return { finalPrice, paidAmount, remainingAmount };
+  return { finalPrice, paidAmount, remainingAmount, addonTotal };
 }
 
 export function resolveBookingStatus(input: {
@@ -143,7 +195,11 @@ export function buildInquiryWhatsappMessage(input: {
   bookerName: string;
   bookerPhone: string;
   meetingPoint: string;
+  gatherDate?: string;
+  gatherTime?: string;
   pax: number;
+  pricePerPerson?: number;
+  addons?: Array<{ name: string; price: number }>;
   contactName?: string;
   participants: Array<{
     name: string;
@@ -163,6 +219,15 @@ export function buildInquiryWhatsappMessage(input: {
         `${index + 1}. ${person.name} / ${person.phone} / ${genderLabel(person.gender)} / ${formatIdDate(person.birthDate)}`,
     )
     .join('\n');
+  const addons = normalizeAddons(input.addons);
+  const extras = sumAddonTotal(addons);
+  const tripTotal = Math.round((input.pricePerPerson ?? 0) * input.pax);
+  const addonLines = addons
+    .map(
+      (item, index) =>
+        `${index + 1}. ${item.name} — Rp ${item.price.toLocaleString('id-ID')}`,
+    )
+    .join('\n');
 
   return [
     `Halo ${contact}, saya ingin daftar Open Trip:`,
@@ -172,15 +237,31 @@ export function buildInquiryWhatsappMessage(input: {
     `Tanggal: ${dates}`,
     `Pemesan: ${input.bookerName}`,
     `HP: ${input.bookerPhone}`,
-    `Titik kumpul: ${input.meetingPoint}`,
+    `Titik kumpul: ${input.meetingPoint}${
+      formatMeetingSchedule(input)
+        ? ` (${formatMeetingSchedule(input)})`
+        : ''
+    }`,
     `Jumlah peserta: ${input.pax} orang`,
+    tripTotal > 0
+      ? `Harga trip: Rp ${tripTotal.toLocaleString('id-ID')}`
+      : undefined,
+    extras > 0 ? `Add-on: Rp ${extras.toLocaleString('id-ID')}` : undefined,
+    tripTotal + extras > 0
+      ? `Estimasi total: Rp ${(tripTotal + extras).toLocaleString('id-ID')}`
+      : undefined,
     'Metode: Konfirmasi via admin',
     '',
     'Peserta:',
     people,
+    addonLines ? '' : undefined,
+    addonLines ? 'Add-on:' : undefined,
+    addonLines || undefined,
     '',
     'Mohon konfirmasi ketersediaan dan cara pembayaran. Terima kasih.',
-  ].join('\n');
+  ]
+    .filter((line) => line !== undefined)
+    .join('\n');
 }
 
 export function toPayment(input: {

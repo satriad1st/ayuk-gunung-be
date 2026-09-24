@@ -42,6 +42,16 @@ export class OpenTripMeetingPointDto {
   @IsInt()
   @Min(0)
   suggestedDp?: number;
+
+  @ApiPropertyOptional({ example: '2026-10-09' })
+  @IsOptional()
+  @Matches(DATE_YMD)
+  gatherDate?: string;
+
+  @ApiPropertyOptional({ example: '20:00' })
+  @IsOptional()
+  @Matches(/^\d{2}:\d{2}$/)
+  gatherTime?: string;
 }
 
 export class CreateOpenTripDto {

@@ -407,6 +407,8 @@ export class OpenTripService {
       name: string;
       pricePerPerson: number;
       suggestedDp?: number;
+      gatherDate?: string;
+      gatherTime?: string;
     }>,
   ) {
     const points = items
@@ -420,10 +422,14 @@ export class OpenTripService {
           name: string;
           pricePerPerson: number;
           suggestedDp: number;
+          gatherDate?: string;
+          gatherTime?: string;
         } = {
           name,
           pricePerPerson: item.pricePerPerson,
           suggestedDp: item.suggestedDp ?? 0,
+          gatherDate: item.gatherDate || undefined,
+          gatherTime: item.gatherTime || undefined,
         };
         if (item.id && Types.ObjectId.isValid(item.id)) {
           doc._id = new Types.ObjectId(item.id);

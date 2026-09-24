@@ -24,6 +24,12 @@ export class OpenTripMeetingPointResponseDto {
 
   @ApiProperty()
   suggestedDp: number;
+
+  @ApiPropertyOptional()
+  gatherDate?: string;
+
+  @ApiPropertyOptional()
+  gatherTime?: string;
 }
 
 export class OpenTripResponseDto {

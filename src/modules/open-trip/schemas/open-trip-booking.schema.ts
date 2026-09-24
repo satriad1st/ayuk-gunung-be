@@ -73,6 +73,17 @@ export class OpenTripPayment {
 export const OpenTripPaymentSchema =
   SchemaFactory.createForClass(OpenTripPayment);
 
+@Schema({ _id: false })
+export class OpenTripAddon {
+  @Prop({ required: true, trim: true })
+  name: string;
+
+  @Prop({ required: true, min: 0 })
+  price: number;
+}
+
+export const OpenTripAddonSchema = SchemaFactory.createForClass(OpenTripAddon);
+
 @Schema({ timestamps: true, collection: 'open_trip_bookings' })
 export class OpenTripBooking {
   @Prop({ type: Types.ObjectId, ref: 'OpenTrip', required: true, index: true })
@@ -108,6 +119,12 @@ export class OpenTripBooking {
   @Prop({ required: true, trim: true })
   meetingPoint: string;
 
+  @Prop({ trim: true })
+  meetingGatherDate?: string;
+
+  @Prop({ trim: true })
+  meetingGatherTime?: string;
+
   @Prop({ min: 0, default: 0 })
   pricePerPerson: number;
 
@@ -116,6 +133,12 @@ export class OpenTripBooking {
 
   @Prop({ type: [OpenTripParticipantSchema], default: [] })
   participants: OpenTripParticipant[];
+
+  @Prop({ type: [OpenTripAddonSchema], default: [] })
+  addons: OpenTripAddon[];
+
+  @Prop({ min: 0, default: 0 })
+  addonTotal: number;
 
   @Prop({
     type: String,

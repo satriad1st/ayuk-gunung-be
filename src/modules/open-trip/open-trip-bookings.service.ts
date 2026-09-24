@@ -24,7 +24,9 @@ import {
   buildInquiryWhatsappMessage,
   findMeetingPoint,
   moneyTotals,
+  normalizeAddons,
   resolveBookingStatus,
+  sumAddonTotal,
   toPayment,
   whatsappUrl,
 } from './open-trip.helpers';
@@ -155,14 +157,16 @@ export class OpenTripBookingsService {
         ]
       : [];
     const paidAmount = payments.reduce((sum, item) => sum + item.amount, 0);
-    if (paidAmount > mepo.pricePerPerson * dto.pax) {
-      throw new BadRequestException('Pembayaran awal melebihi harga final');
-    }
+    const addons = normalizeAddons(dto.addons);
     const money = moneyTotals({
       pax: dto.pax,
       pricePerPerson: mepo.pricePerPerson,
+      addonTotal: sumAddonTotal(addons),
       paidAmount,
     });
+    if (paidAmount > money.finalPrice) {
+      throw new BadRequestException('Pembayaran awal melebihi harga final');
+    }
     const resolvedStatus = resolveBookingStatus({
       requested: bookingStatus,
       paidAmount: money.paidAmount,
@@ -185,6 +189,8 @@ export class OpenTripBookingsService {
       bookerEmail: dto.bookerEmail?.trim().toLowerCase() || undefined,
       meetingPointId: mepo.id,
       meetingPoint: mepo.name,
+      meetingGatherDate: mepo.gatherDate,
+      meetingGatherTime: mepo.gatherTime,
       pricePerPerson: mepo.pricePerPerson,
       pax: dto.pax,
       participants: dto.participants.map((person) => ({
@@ -193,6 +199,7 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       })),
+      addons,
       paymentChannel: dto.paymentChannel ?? OpenTripPaymentChannel.ADMIN,
       bookingStatus: resolvedStatus,
       ...money,
@@ -217,9 +224,11 @@ export class OpenTripBookingsService {
     );
 
     const mepo = this.requireMeetingPoint(trip, dto.meetingPointId);
+    const addons = normalizeAddons(dto.addons);
     const money = moneyTotals({
       pax: dto.pax,
       pricePerPerson: mepo.pricePerPerson,
+      addonTotal: sumAddonTotal(addons),
       paidAmount: 0,
     });
 
@@ -235,6 +244,8 @@ export class OpenTripBookingsService {
       bookerEmail: user.email.trim().toLowerCase(),
       meetingPointId: mepo.id,
       meetingPoint: mepo.name,
+      meetingGatherDate: mepo.gatherDate,
+      meetingGatherTime: mepo.gatherTime,
       pricePerPerson: mepo.pricePerPerson,
       pax: dto.pax,
       participants: dto.participants.map((person) => ({
@@ -243,6 +254,7 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       })),
+      addons,
       paymentChannel: OpenTripPaymentChannel.ADMIN,
       bookingStatus: OpenTripBookingStatus.INQUIRY,
       ...money,
@@ -285,6 +297,8 @@ export class OpenTripBookingsService {
       const mepo = this.requireMeetingPoint(trip, dto.meetingPointId);
       booking.meetingPointId = mepo.id;
       booking.meetingPoint = mepo.name;
+      booking.meetingGatherDate = mepo.gatherDate;
+      booking.meetingGatherTime = mepo.gatherTime;
       booking.pricePerPerson = mepo.pricePerPerson;
     }
     if (dto.pax !== undefined) {
@@ -297,6 +311,9 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       }));
+    }
+    if (dto.addons !== undefined) {
+      booking.addons = normalizeAddons(dto.addons);
     }
     if (dto.notes !== undefined) {
       booking.notes = dto.notes.trim() || undefined;
@@ -321,6 +338,7 @@ export class OpenTripBookingsService {
     const money = moneyTotals({
       pax: booking.pax,
       pricePerPerson,
+      addonTotal: sumAddonTotal(booking.addons ?? []),
       paidAmount,
     });
     Object.assign(booking, money);
@@ -362,6 +380,7 @@ export class OpenTripBookingsService {
     const money = moneyTotals({
       pax: booking.pax,
       pricePerPerson,
+      addonTotal: sumAddonTotal(booking.addons ?? []),
       paidAmount: this.sumPayments(booking.payments),
     });
     Object.assign(booking, money);
@@ -404,6 +423,7 @@ export class OpenTripBookingsService {
     const money = moneyTotals({
       pax: booking.pax,
       pricePerPerson,
+      addonTotal: sumAddonTotal(booking.addons ?? []),
       paidAmount: this.sumPayments(booking.payments),
     });
     Object.assign(booking, money);
@@ -511,6 +531,11 @@ export class OpenTripBookingsService {
         createdAt: payment.createdAt ?? payment.paidAt,
       }),
     );
+    const addons = (booking.addons ?? []).map((item) => ({
+      name: item.name,
+      price: item.price,
+    }));
+    const addonTotal = booking.addonTotal ?? sumAddonTotal(addons);
     const message = whatsappPhone
       ? buildInquiryWhatsappMessage({
           tripName: booking.openTripName,
@@ -520,7 +545,11 @@ export class OpenTripBookingsService {
           bookerName: booking.bookerName,
           bookerPhone: booking.bookerPhone,
           meetingPoint: booking.meetingPoint,
+          gatherDate: booking.meetingGatherDate,
+          gatherTime: booking.meetingGatherTime,
           pax: booking.pax,
+          pricePerPerson: booking.pricePerPerson,
+          addons,
           contactName: whatsappName,
           participants: booking.participants,
         })
@@ -541,6 +570,8 @@ export class OpenTripBookingsService {
       bookerEmail: booking.bookerEmail,
       meetingPointId: booking.meetingPointId,
       meetingPoint: booking.meetingPoint,
+      meetingGatherDate: booking.meetingGatherDate,
+      meetingGatherTime: booking.meetingGatherTime,
       pax: booking.pax,
       participants: booking.participants.map((person) => ({
         name: person.name,
@@ -548,11 +579,17 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       })),
+      addons,
+      addonTotal,
       paymentChannel: booking.paymentChannel,
       bookingStatus: booking.bookingStatus,
       pricePerPerson:
         booking.pricePerPerson ||
-        Math.round(booking.pax > 0 ? booking.finalPrice / booking.pax : 0),
+        Math.round(
+          booking.pax > 0
+            ? (booking.finalPrice - addonTotal) / booking.pax
+            : 0,
+        ),
       finalPrice: booking.finalPrice,
       paidAmount: booking.paidAmount,
       remainingAmount: booking.remainingAmount,
@@ -577,6 +614,12 @@ export class OpenTripBookingsService {
         new Date(left.paidAt).getTime() - new Date(right.paidAt).getTime(),
     );
 
+    const addons = (booking.addons ?? []).map((item) => ({
+      name: item.name,
+      price: item.price,
+    }));
+    const addonTotal = booking.addonTotal ?? sumAddonTotal(addons);
+
     return {
       id: booking._id.toString(),
       openTripName: booking.openTripName,
@@ -585,9 +628,15 @@ export class OpenTripBookingsService {
       tripEndDate: booking.tripEndDate,
       bookerName: booking.bookerName,
       meetingPoint: booking.meetingPoint,
+      meetingGatherDate: booking.meetingGatherDate,
+      meetingGatherTime: booking.meetingGatherTime,
       pricePerPerson:
         booking.pricePerPerson ||
-        Math.round(booking.pax > 0 ? booking.finalPrice / booking.pax : 0),
+        Math.round(
+          booking.pax > 0
+            ? (booking.finalPrice - addonTotal) / booking.pax
+            : 0,
+        ),
       pax: booking.pax,
       participants: booking.participants.map((person) => ({
         name: person.name,
@@ -595,6 +644,8 @@ export class OpenTripBookingsService {
         gender: person.gender,
         birthDate: person.birthDate,
       })),
+      addons,
+      addonTotal,
       bookingStatus: booking.bookingStatus,
       finalPrice: booking.finalPrice,
       paidAmount: booking.paidAmount,

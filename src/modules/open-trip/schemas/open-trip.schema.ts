@@ -19,6 +19,12 @@ export class OpenTripMeetingPoint {
 
   @Prop({ min: 0, default: 0 })
   suggestedDp: number;
+
+  @Prop({ trim: true })
+  gatherDate?: string;
+
+  @Prop({ trim: true })
+  gatherTime?: string;
 }
 
 export const OpenTripMeetingPointSchema =
